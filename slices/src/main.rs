@@ -1,7 +1,6 @@
 fn main() {
     println!("{}", first_word("Hello world!"));
     println!("{}", first_word("Ciao"));
-
 }
 
 fn first_word(s: &str) -> &str {

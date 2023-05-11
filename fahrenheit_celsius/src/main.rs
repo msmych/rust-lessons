@@ -5,7 +5,6 @@ const NINE: f64 = 9.0;
 const THIRTY_TWO: f64 = 32.0;
 
 fn main() {
-
     println!("Choose Fahrenheit (f) or Celsius (c):");
 
     let mut system = String::new();
@@ -19,10 +18,16 @@ fn main() {
         Err(_) => 'f',
     };
 
-    println!("Temperature in {}:", if system == 'f' { "Fahrenheit" } else { "Celsius" });
+    println!(
+        "Temperature in {}:",
+        if system == 'f' {
+            "Fahrenheit"
+        } else {
+            "Celsius"
+        }
+    );
 
     loop {
-
         let mut source_temp = String::new();
 
         io::stdin()

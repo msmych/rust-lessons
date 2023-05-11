@@ -1,7 +1,10 @@
 fn main() {
     println!("Twelve Days Of Christmas");
 
-    let days = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth", "eleventh", "twelfth" ];
+    let days = [
+        "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth",
+        "tenth", "eleventh", "twelfth",
+    ];
 
     let mut i = 0;
 

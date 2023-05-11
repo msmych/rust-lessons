@@ -5,12 +5,9 @@ fn main() {
 
     let mut n = String::new();
 
-    io::stdin()
-        .read_line(&mut n)
-        .expect("Failed to read line");
+    io::stdin().read_line(&mut n).expect("Failed to read line");
 
     loop {
-
         let n: u32 = match n.trim().parse() {
             Ok(0) => continue,
             Ok(num) => num,

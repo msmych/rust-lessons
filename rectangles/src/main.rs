@@ -31,7 +31,10 @@ fn main() {
     dbg!(&rect1);
 
     println!("rect1 is {:?}", rect1);
-    println!("The area of the rectangle is {:?} square pixels", rect1.area());
+    println!(
+        "The area of the rectangle is {:?} square pixels",
+        rect1.area()
+    );
 
     let rect2 = Rectangle {
         width: 10,
