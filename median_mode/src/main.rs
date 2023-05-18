@@ -2,28 +2,35 @@ use std::collections::HashMap;
 use std::io;
 
 fn main() {
-    let arr = [1, 2, 1, 4, 3, 2, 2, 3];
-    println!("Array: {:?}", arr);
-    println!("Median: {:?}", median(&arr));
-    println!("Mode: {:?}", mode(&arr));
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+    let nums = input
+        .split_whitespace()
+        .map(|n| n.parse::<i32>().unwrap())
+        .collect();
+    println!("Numbers: {:?}", nums);
+    println!("Median: {:?}", median(&nums));
+    println!("Mode: {:?}", mode(&nums));
 }
 
-fn median(arr: &[i32]) -> i32 {
-    let mut v = Vec::from(arr);
+fn median(nums: &Vec<i32>) -> i32 {
+    let mut v = nums.clone();
     v.sort();
     v[v.len() / 2]
 }
 
-fn mode(arr: &[i32]) -> i32 {
+fn mode(nums: &Vec<i32>) -> i32 {
     let mut map = HashMap::new();
     let mut max_o = 0;
     let mut mode = 0;
-    for i in arr {
-        let o = map.entry(i).or_insert(0);
+    for n in nums {
+        let o = map.entry(n).or_insert(0);
         *o += 1;
         if *o > max_o {
             max_o = *o;
-            mode = *i;
+            mode = *n;
         }
     }
     mode
