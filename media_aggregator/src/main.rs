@@ -1,4 +1,4 @@
-use media_aggregator:t{NewsArticle, Summary, Tweet};
+use media_aggregator::{NewsArticle, Summary, Tweet};
 use std::fmt::Display;
 
 fn main() {
