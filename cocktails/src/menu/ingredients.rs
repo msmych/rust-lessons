@@ -1,6 +1,28 @@
+use uuid::Uuid;
+
+#[derive(Debug)]
+pub struct Ingredient {
+    id: Uuid,
+    name: String,
+    owner: Option<Uuid>,
+}
+
+impl Ingredient {
+    pub fn common(name: &str) -> Self {
+        Ingredient {
+            id: Uuid::new_v4(),
+            name: name.to_string(),
+            owner: None,
+        }
+    }
+
+    pub fn id(&self) -> Uuid {
+        self.id
+    }
+}
+
 #[derive(Debug, Clone)]
-pub struct IngredientAmount {
-    pub item_id: String,
-    pub amount: u8,
-    pub unit: String,
+pub enum Amount {
+    Some,
+    Cl(u8),
 }

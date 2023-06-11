@@ -1,9 +1,10 @@
+use uuid::Uuid;
+
 pub mod menu;
 
 #[derive(Debug)]
-pub struct RecipeStep {
-    pub id: String,
-    pub step: String,
+pub struct Account {
+    id: Uuid,
 }
 
 pub fn add(left: usize, right: usize) -> usize {
