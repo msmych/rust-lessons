@@ -1,16 +1,20 @@
-use cocktails::menu::ingredients::{Amount, Ingredient};
+use cocktails::menu::ingredients::{Amount, Ingredient, IngredientService};
 use cocktails::menu::{recipe::Recipe, Menu};
+use cocktails::{Account, AccountService};
 use std::collections::HashMap;
 
 fn main() {
-    let ingredients = common_ingredients();
-    let campari = ingredients.get("Campari").expect("msg").id();
-    let red_vermouth = ingredients.get("Red Vermouth").expect("msg").id();
-    let soda_water = ingredients.get("Soda water").expect("msg").id();
+    let mut account_service = AccountService::create();
+    let account = Account::new();
+    account_service.add(account.clone());
+    let ingredient_service = init_ingredients_service();
+    let campari = ingredient_service.get_by_name("Campari");
+    let red_vermouth = ingredient_service.get_by_name("Red Vermouth");
+    let soda_water = ingredient_service.get_by_name("Soda water");
     let americano_ingredients = HashMap::from([
-        (campari, Amount::Cl(3)),
-        (red_vermouth, Amount::Cl(3)),
-        (soda_water, Amount::Some),
+        (campari.id(), Amount::Cl(3)),
+        (red_vermouth.id(), Amount::Cl(3)),
+        (soda_water.id(), Amount::Some),
     ]);
     let americano = Recipe::new(
         "Americano",
@@ -25,13 +29,10 @@ fn main() {
     println!("{:?}", menu)
 }
 
-fn common_ingredients() -> HashMap<String, Ingredient> {
-    let mut ingredients = HashMap::new();
-    ingredients.insert(String::from("Campari"), Ingredient::common("Campari"));
-    ingredients.insert(
-        String::from("Red Vermouth"),
-        Ingredient::common("Red Vermouth"),
-    );
-    ingredients.insert(String::from("Soda water"), Ingredient::common("Soda water"));
-    ingredients
+fn init_ingredients_service() -> IngredientService {
+    let mut ingredient_service = IngredientService::create();
+    ingredient_service.add(Ingredient::common("Campari"));
+    ingredient_service.add(Ingredient::common("Red Vermouth"));
+    ingredient_service.add(Ingredient::common("Soda water"));
+    ingredient_service
 }
