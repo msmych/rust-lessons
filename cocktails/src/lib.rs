@@ -13,6 +13,10 @@ impl Account {
     pub fn new() -> Self {
         Account { id: Uuid::new_v4() }
     }
+
+    pub fn id(&self) -> Uuid {
+        self.id
+    }
 }
 
 pub struct AccountService {

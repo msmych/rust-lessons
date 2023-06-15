@@ -1,4 +1,5 @@
 use cocktails::menu::ingredients::{Amount, Ingredient, IngredientService};
+use cocktails::menu::MenuService;
 use cocktails::menu::{recipe::Recipe, Menu};
 use cocktails::{Account, AccountService};
 use std::collections::HashMap;
@@ -7,6 +8,15 @@ fn main() {
     let mut account_service = AccountService::create();
     let account = Account::new();
     account_service.add(account.clone());
+
+    println!("Account: {:?}", account_service.get(account.id()));
+
+    let mut menu_service = MenuService::create();
+    let menu = Menu::new(account.id(), "Summer menu");
+    menu_service.add(menu.clone());
+
+    println!("Menu: {:?}", menu_service.get(menu.id()));
+
     let ingredient_service = init_ingredients_service();
     let campari = ingredient_service.get_by_name("Campari");
     let red_vermouth = ingredient_service.get_by_name("Red Vermouth");
@@ -24,9 +34,6 @@ fn main() {
     filled with ice cubes, 
     add a splash of soda water and garnish with half orange slice",
     );
-    let menu = Menu::new("My menu");
-    let menu = menu.add_recipe(americano);
-    println!("{:?}", menu)
 }
 
 fn init_ingredients_service() -> IngredientService {
