@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-pub mod ingredients;
+pub mod ingredient;
 pub mod recipe;
 
 #[derive(Debug, Clone)]

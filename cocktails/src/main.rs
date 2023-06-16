@@ -1,4 +1,5 @@
-use cocktails::menu::ingredients::{Amount, Ingredient, IngredientService};
+use cocktails::menu::ingredient::{Amount, Ingredient, IngredientService};
+use cocktails::menu::recipe::RecipeService;
 use cocktails::menu::MenuService;
 use cocktails::menu::{recipe::Recipe, Menu};
 use cocktails::{Account, AccountService};
@@ -17,29 +18,32 @@ fn main() {
 
     println!("Menu: {:?}", menu_service.get(menu.id()));
 
-    let ingredient_service = init_ingredients_service();
-    let campari = ingredient_service.get_by_name("Campari");
-    let red_vermouth = ingredient_service.get_by_name("Red Vermouth");
-    let soda_water = ingredient_service.get_by_name("Soda water");
-    let americano_ingredients = HashMap::from([
-        (campari.id(), Amount::Cl(3)),
-        (red_vermouth.id(), Amount::Cl(3)),
-        (soda_water.id(), Amount::Some),
-    ]);
+    let mut ingredient_service = IngredientService::create();
+    let campari = Ingredient::common("Campari");
+    ingredient_service.add(campari.clone());
+    let red_vermouth = Ingredient::common("Red Vermouth");
+    ingredient_service.add(red_vermouth.clone());
+    let soda_water = Ingredient::common("Soda water");
+    ingredient_service.add(soda_water.clone());
+
+    println!(
+        "Campari: {:?}, Red Vermouth: {:?}, Soda water: {:?}",
+        campari, red_vermouth, soda_water
+    );
+
+    let mut recipe_service = RecipeService::create();
     let americano = Recipe::new(
         "Americano",
-        "N/A",
-        americano_ingredients,
+        HashMap::from([
+            (campari.id(), Amount::Oz(1)),
+            (red_vermouth.id(), Amount::Oz(1)),
+            (soda_water.id(), Amount::Some),
+        ]),
         "Mix the ingredients directly in an old-fashioned glass \
     filled with ice cubes, 
     add a splash of soda water and garnish with half orange slice",
     );
-}
+    recipe_service.add(americano.clone());
 
-fn init_ingredients_service() -> IngredientService {
-    let mut ingredient_service = IngredientService::create();
-    ingredient_service.add(Ingredient::common("Campari"));
-    ingredient_service.add(Ingredient::common("Red Vermouth"));
-    ingredient_service.add(Ingredient::common("Soda water"));
-    ingredient_service
+    println!("Americano: {:?}", americano);
 }
