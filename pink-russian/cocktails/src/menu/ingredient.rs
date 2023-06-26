@@ -54,7 +54,7 @@ impl IngredientService {
 
 #[cfg(test)]
 mod tests {
-    use super::{Ingredient, IngredientService};
+    use super::*;
 
     #[test]
     fn should_create_ingredients_service_with_empty_ingredients() {

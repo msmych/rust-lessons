@@ -1,10 +1,14 @@
+use actix_web::{web, App, HttpServer};
+use app::{ciao, create_account};
 use cocktails::menu::ingredient::{Amount, Ingredient, IngredientService};
 use cocktails::menu::recipe::{Recipe, RecipeService};
 use cocktails::menu::{Menu, MenuService};
 use cocktails::{Account, AccountService};
 use std::collections::HashMap;
+use std::sync::Mutex;
 
-fn main() {
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
     let mut account_service = AccountService::create();
     let account = Account::new();
     account_service.add(account.clone());
@@ -45,4 +49,14 @@ fn main() {
     recipe_service.add(americano.clone());
 
     println!("Americano: {:?}", americano);
+
+    HttpServer::new(|| {
+        App::new()
+            .app_data(web::Data::new(Mutex::new(AccountService::create())))
+            .route("/ciao", web::get().to(ciao))
+            .service(create_account)
+    })
+    .bind(("localhost", 8080))?
+    .run()
+    .await
 }

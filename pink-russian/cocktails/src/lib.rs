@@ -19,6 +19,7 @@ impl Account {
     }
 }
 
+#[derive(Clone)]
 pub struct AccountService {
     accounts: HashMap<Uuid, Account>,
 }
