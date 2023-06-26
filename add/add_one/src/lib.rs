@@ -10,7 +10,7 @@ use rand;
 ///
 /// ```
 /// let arg = 5;
-/// let answer = adder::add_one(arg);
+/// let answer = add_one::add_one(arg);
 ///
 /// assert_eq!(6, answer);
 /// ```
