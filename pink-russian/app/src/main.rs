@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpServer};
-use app::{ciao, create_account};
+use app::{ciao, create_account, Services};
 use cocktails::menu::ingredient::{Amount, Ingredient, IngredientService};
 use cocktails::menu::recipe::{Recipe, RecipeService};
 use cocktails::menu::{Menu, MenuService};
@@ -52,7 +52,9 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-            .app_data(web::Data::new(Mutex::new(AccountService::create())))
+            .app_data(web::Data::new(Mutex::new(Services {
+                account_service: AccountService::create(),
+            })))
             .route("/ciao", web::get().to(ciao))
             .service(create_account)
     })
