@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpServer};
-use app::{ciao, create_account, Services};
+use app::{ciao, create_account, create_menu};
 use cocktails::menu::ingredient::{Amount, Ingredient, IngredientService};
 use cocktails::menu::recipe::{Recipe, RecipeService};
 use cocktails::menu::{Menu, MenuService};
@@ -43,7 +43,7 @@ async fn main() -> std::io::Result<()> {
             (soda_water.id(), Amount::Some),
         ]),
         "Mix the ingredients directly in an old-fashioned glass \
-    filled with ice cubes,
+    filled with ice cubes, \
     add a splash of soda water and garnish with half orange slice",
     );
     recipe_service.add(americano.clone());
@@ -52,11 +52,11 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-            .app_data(web::Data::new(Mutex::new(Services {
-                account_service: AccountService::create(),
-            })))
+            .app_data(web::Data::new(Mutex::new(AccountService::create())))
+            .app_data(web::Data::new(Mutex::new(MenuService::create())))
             .route("/ciao", web::get().to(ciao))
             .service(create_account)
+            .service(create_menu)
     })
     .bind(("localhost", 8080))?
     .run()

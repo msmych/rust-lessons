@@ -5,33 +5,33 @@ use cocktails::{
     menu::{Menu, MenuService},
     Account, AccountService,
 };
+use serde::Deserialize;
 use uuid::Uuid;
-
-pub struct Services {
-    pub account_service: AccountService,
-    pub menu_service: MenuService,
-}
 
 pub async fn ciao() -> impl Responder {
     HttpResponse::Ok().body("Ciao")
 }
 
 #[post("/accounts")]
-pub async fn create_account(services: web::Data<Mutex<Services>>) -> impl Responder {
+pub async fn create_account(account_service: web::Data<Mutex<AccountService>>) -> impl Responder {
     let account = Account::new();
-    services
-        .lock()
-        .unwrap()
-        .account_service
-        .add(account.clone());
+    account_service.lock().unwrap().add(account.clone());
     HttpResponse::Ok().body(account.id().to_string())
 }
 
+#[derive(Debug, Deserialize)]
+pub struct CreateMenuRequest {
+    account_id: Uuid,
+    name: String,
+}
+
+#[post("/menus")]
 pub async fn create_menu(
-    account_id: String,
-    services: web::Data<Mutex<Services>>,
+    rq: web::Json<CreateMenuRequest>,
+    menu_service: web::Data<Mutex<MenuService>>,
 ) -> impl Responder {
-    let menu = Menu::new(Uuid::from(account_id), "Summer menu");
-    services.lock().unwrap().menu_service.add(menu);
+    let rq = rq.into_inner();
+    let menu = Menu::new(rq.account_id, &rq.name);
+    menu_service.lock().unwrap().add(menu.clone());
     HttpResponse::Ok().body(menu.id().to_string())
 }
