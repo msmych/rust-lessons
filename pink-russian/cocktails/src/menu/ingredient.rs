@@ -66,8 +66,8 @@ mod tests {
     fn should_add_and_get_ingredient() {
         let mut ingrs = IngredientService::create();
 
-        let gin = Ingredient::common("Gin");
-        let campari = Ingredient::common("Campari");
+        let gin = Ingredient::new("Gin", None);
+        let campari = Ingredient::new("Campari", None);
 
         ingrs.add(gin.clone());
         ingrs.add(campari.clone());
