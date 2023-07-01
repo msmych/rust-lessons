@@ -10,11 +10,11 @@ pub struct Ingredient {
 }
 
 impl Ingredient {
-    pub fn common(name: &str) -> Self {
+    pub fn new(name: &str, owner_id: Option<Uuid>) -> Self {
         Ingredient {
             id: Uuid::new_v4(),
             name: name.to_string(),
-            owner: None,
+            owner: owner_id,
         }
     }
 
