@@ -10,11 +10,11 @@ pub struct Ingredient {
 }
 
 impl Ingredient {
-    pub fn common(name: &str) -> Self {
+    pub fn new(name: &str, owner_id: Option<Uuid>) -> Self {
         Ingredient {
             id: Uuid::new_v4(),
             name: name.to_string(),
-            owner: None,
+            owner: owner_id,
         }
     }
 
@@ -66,8 +66,8 @@ mod tests {
     fn should_add_and_get_ingredient() {
         let mut ingrs = IngredientService::create();
 
-        let gin = Ingredient::common("Gin");
-        let campari = Ingredient::common("Campari");
+        let gin = Ingredient::new("Gin", None);
+        let campari = Ingredient::new("Campari", None);
 
         ingrs.add(gin.clone());
         ingrs.add(campari.clone());
