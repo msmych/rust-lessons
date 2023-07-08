@@ -1,6 +1,7 @@
 #[derive(Debug)]
 enum List {
-    Cons(i32, Box<List>),
+    BoxCons(i32, Box<List>),
+    RcCons(i32, Rc<List>),
     Nil,
 }
 
@@ -30,11 +31,12 @@ impl Drop for CustomSmartPointer {
     }
 }
 
-use crate::List::{Cons, Nil};
+use crate::List::{BoxCons, Nil, RcCons};
 use std::ops::Deref;
+use std::rc::Rc;
 
 fn main() {
-    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+    let list = BoxCons(1, Box::new(BoxCons(2, Box::new(BoxCons(3, Box::new(Nil))))));
     println!("List: {:?}", list);
 
     let m = MyBox::new(String::from("Rust"));
@@ -46,6 +48,19 @@ fn main() {
     let d = CustomSmartPointer {
         data: String::from("other stuff"),
     };
+
+    let rca = Rc::new(RcCons(5, Rc::new(RcCons(10, Rc::new(Nil)))));
+    println!("count after creating rca = {}", Rc::strong_count(&rca));
+    let rcb = RcCons(3, Rc::clone(&rca));
+    println!("count after creating rcb = {}", Rc::strong_count(&rca));
+    {
+        let rcc = RcCons(4, Rc::clone(&rca));
+        println!("count after creating rcc = {}", Rc::strong_count(&rca));
+    }
+    println!(
+        "count after rcc goes out of scope = {}",
+        Rc::strong_count(&rca)
+    );
 
     println!("CustomSmartPointer created.");
     drop(c);
