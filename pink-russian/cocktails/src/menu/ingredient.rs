@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Mutex};
 
 use uuid::Uuid;
 
@@ -31,24 +31,30 @@ pub enum Amount {
 }
 
 pub struct IngredientService {
-    ingredients: HashMap<Uuid, Ingredient>,
+    ingredients: Mutex<HashMap<Uuid, Ingredient>>,
 }
 
 impl IngredientService {
     pub fn create() -> Self {
         IngredientService {
-            ingredients: HashMap::new(),
+            ingredients: Mutex::new(HashMap::new()),
         }
     }
 
-    pub fn add(&mut self, ingredient: Ingredient) {
-        self.ingredients.insert(ingredient.id.clone(), ingredient);
+    pub fn add(&self, ingredient: Ingredient) {
+        self.ingredients
+            .lock()
+            .unwrap()
+            .insert(ingredient.id.clone(), ingredient);
     }
 
-    pub fn get(&self, id: Uuid) -> &Ingredient {
+    pub fn get(&self, id: Uuid) -> Ingredient {
         self.ingredients
+            .lock()
+            .unwrap()
             .get(&id)
             .expect(format!("Not found ingredient by id {:?}", id).as_str())
+            .to_owned()
     }
 }
 
@@ -59,12 +65,12 @@ mod tests {
     #[test]
     fn should_create_ingredients_service_with_empty_ingredients() {
         let ingrs = IngredientService::create();
-        assert!(ingrs.ingredients.is_empty());
+        assert!(ingrs.ingredients.lock().unwrap().is_empty());
     }
 
     #[test]
     fn should_add_and_get_ingredient() {
-        let mut ingrs = IngredientService::create();
+        let ingrs = IngredientService::create();
 
         let gin = Ingredient::new("Gin", None);
         let campari = Ingredient::new("Campari", None);
@@ -72,7 +78,7 @@ mod tests {
         ingrs.add(gin.clone());
         ingrs.add(campari.clone());
 
-        assert_eq!(ingrs.ingredients.len(), 2);
+        assert_eq!(ingrs.ingredients.lock().unwrap().len(), 2);
         assert_eq!(ingrs.get(gin.id).id, gin.id);
         assert_eq!(ingrs.get(campari.id).id, campari.id);
     }

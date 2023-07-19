@@ -1,5 +1,5 @@
 use crate::menu::ingredient::Amount;
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Mutex};
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -26,24 +26,27 @@ impl Recipe {
 }
 
 pub struct RecipeService {
-    recipes: HashMap<Uuid, Recipe>,
+    recipes: Mutex<HashMap<Uuid, Recipe>>,
 }
 
 impl RecipeService {
     pub fn create() -> Self {
         RecipeService {
-            recipes: HashMap::new(),
+            recipes: Mutex::new(HashMap::new()),
         }
     }
 
-    pub fn add(&mut self, recipe: Recipe) {
-        self.recipes.insert(recipe.id, recipe);
+    pub fn add(&self, recipe: Recipe) {
+        self.recipes.lock().unwrap().insert(recipe.id, recipe);
     }
 
-    pub fn get(&self, id: Uuid) -> &Recipe {
+    pub fn get(&self, id: Uuid) -> Recipe {
         self.recipes
+            .lock()
+            .unwrap()
             .get(&id)
             .expect(format!("Not found recipe by id {:?}", id).as_str())
+            .to_owned()
     }
 }
 
@@ -54,7 +57,7 @@ mod tests {
     #[test]
     fn should_create_recipe_service_with_empty_recipes() {
         let recipes = RecipeService::create();
-        assert!(recipes.recipes.is_empty());
+        assert!(recipes.recipes.lock().unwrap().is_empty());
     }
 
     #[test]
@@ -93,7 +96,7 @@ mod tests {
         recipes.add(americano.clone());
         recipes.add(negroni.clone());
 
-        assert_eq!(recipes.recipes.len(), 2);
+        assert_eq!(recipes.recipes.lock().unwrap().len(), 2);
         assert_eq!(recipes.get(americano.id).id, americano.id);
         assert_eq!(recipes.get(negroni.id).id, negroni.id);
     }

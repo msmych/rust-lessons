@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Mutex};
+use std::collections::HashMap;
 
 use actix_web::{post, web, HttpResponse, Responder};
 use cocktails::{
@@ -13,9 +13,9 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 #[post("/accounts")]
-pub async fn create_account(account_service: web::Data<Mutex<AccountService>>) -> impl Responder {
+pub async fn create_account(account_service: web::Data<AccountService>) -> impl Responder {
     let account = Account::new();
-    account_service.lock().unwrap().add(account.clone());
+    account_service.add(account.clone());
     HttpResponse::Ok().body(account.id().to_string())
 }
 
@@ -29,11 +29,11 @@ pub struct CreateMenuRequest {
 #[post("/menus")]
 pub async fn create_menu(
     rq: web::Json<CreateMenuRequest>,
-    menu_service: web::Data<Mutex<MenuService>>,
+    menu_service: web::Data<MenuService>,
 ) -> impl Responder {
     let rq = rq.into_inner();
     let menu = Menu::new(rq.account_id, &rq.name);
-    menu_service.lock().unwrap().add(menu.clone());
+    menu_service.add(menu.clone());
     HttpResponse::Ok().body(menu.id().to_string())
 }
 
@@ -47,11 +47,11 @@ pub struct CreateIngredientRequest {
 #[post("/ingredients")]
 pub async fn create_ingredient(
     rq: web::Json<CreateIngredientRequest>,
-    ingredient_service: web::Data<Mutex<IngredientService>>,
+    ingredient_service: web::Data<IngredientService>,
 ) -> impl Responder {
     let rq = rq.into_inner();
     let ingredient = Ingredient::new(&rq.name, rq.owner_id);
-    ingredient_service.lock().unwrap().add(ingredient.clone());
+    ingredient_service.add(ingredient.clone());
     HttpResponse::Ok().body(ingredient.id().to_string())
 }
 
@@ -73,7 +73,7 @@ pub struct CreateRecipeRequest {
 #[post("/recipes")]
 pub async fn create_recipe(
     rq: web::Json<CreateRecipeRequest>,
-    recipe_service: web::Data<Mutex<RecipeService>>,
+    recipe_service: web::Data<RecipeService>,
 ) -> impl Responder {
     let rq = rq.into_inner();
     let recipe = Recipe::new(
@@ -91,6 +91,6 @@ pub async fn create_recipe(
         }),
         &rq.instruction,
     );
-    recipe_service.lock().unwrap().add(recipe.clone());
+    recipe_service.add(recipe.clone());
     HttpResponse::Ok().body(recipe.id().to_string())
 }

@@ -5,16 +5,18 @@ use cocktails::menu::recipe::RecipeService;
 use cocktails::menu::MenuService;
 use cocktails::AccountService;
 
-use std::sync::Mutex;
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
+        let account_service = AccountService::create();
+        let menu_service = MenuService::create();
+        let ingredient_service = IngredientService::create();
+        let recipe_service = RecipeService::create();
         App::new()
-            .app_data(web::Data::new(Mutex::new(AccountService::create())))
-            .app_data(web::Data::new(Mutex::new(MenuService::create())))
-            .app_data(web::Data::new(Mutex::new(IngredientService::create())))
-            .app_data(web::Data::new(Mutex::new(RecipeService::create())))
+            .app_data(web::Data::new(account_service))
+            .app_data(web::Data::new(menu_service))
+            .app_data(web::Data::new(ingredient_service))
+            .app_data(web::Data::new(recipe_service))
             .service(create_account)
             .service(create_menu)
             .service(create_ingredient)
