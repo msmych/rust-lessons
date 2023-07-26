@@ -7,7 +7,14 @@ fn main() {
 
     let post = post.request_review();
 
-    let post = post.approve();
+    let post = post.reject();
+
+    let mut post = post.request_review();
+
+    post.approve();
+    post.approve();
+
+    let post = post.approved().unwrap();
 
     assert_eq!("I ate a salad for lunch today", post.content());
 }
