@@ -8,7 +8,17 @@ fn shoes_in_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
     shoes.into_iter().filter(|s| s.size == shoe_size).collect()
 }
 
-fn main() {}
+enum Status {
+    Value(u32),
+    Stop,
+}
+
+fn main() {
+    let list_of_numbers = vec![1, 2, 3];
+    let list_of_strings: Vec<String> = list_of_numbers.iter().map(|i| i.to_string()).collect();
+    let list_of_strings: Vec<String> = list_of_numbers.iter().map(ToString::to_string).collect();
+    let list_of_statuses: Vec<Status> = (0u32..20).map(Status::Value).collect();
+}
 
 #[cfg(test)]
 mod tests {
