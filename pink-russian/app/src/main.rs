@@ -1,5 +1,10 @@
+use std::sync::Arc;
+
 use actix_web::{web, App, HttpServer};
-use app::{create_account, create_ingredient, create_menu, create_recipe, get_account};
+use app::{
+    create_account, create_ingredient, create_menu, create_recipe, get_account, get_ingredient,
+    get_menu, get_recipe,
+};
 use cocktails::menu::ingredient::IngredientService;
 use cocktails::menu::recipe::RecipeService;
 use cocktails::menu::MenuService;
@@ -10,11 +15,11 @@ use surrealdb::Surreal;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let db = setup_db().await;
-    let account_service = web::Data::new(AccountService::create(db));
-    let menu_service = web::Data::new(MenuService::create());
-    let ingredient_service = web::Data::new(IngredientService::create());
-    let recipe_service = web::Data::new(RecipeService::create());
+    let db = Arc::new(setup_db().await);
+    let account_service = web::Data::new(AccountService::create(Arc::clone(&db)));
+    let menu_service = web::Data::new(MenuService::create(Arc::clone(&db)));
+    let ingredient_service = web::Data::new(IngredientService::create(Arc::clone(&db)));
+    let recipe_service = web::Data::new(RecipeService::create(Arc::clone(&db)));
     HttpServer::new(move || {
         App::new()
             .app_data(account_service.clone())
@@ -24,8 +29,11 @@ async fn main() -> std::io::Result<()> {
             .service(create_account)
             .service(get_account)
             .service(create_menu)
+            .service(get_menu)
             .service(create_ingredient)
+            .service(get_ingredient)
             .service(create_recipe)
+            .service(get_recipe)
     })
     .bind(("localhost", 8080))?
     .run()

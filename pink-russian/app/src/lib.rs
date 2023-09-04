@@ -14,7 +14,6 @@ use cocktails::{
     Account, AccountService,
 };
 use serde::Deserialize;
-use uuid::Uuid;
 
 #[post("/accounts")]
 pub async fn create_account(
@@ -47,7 +46,7 @@ pub async fn get_account(
 #[derive(Deserialize)]
 pub struct CreateMenuRequest {
     #[serde(rename = "accountId")]
-    account_id: Uuid,
+    account_id: String,
     name: String,
 }
 
@@ -58,15 +57,25 @@ pub async fn create_menu(
 ) -> impl Responder {
     let rq = rq.into_inner();
     let menu = Menu::new(rq.account_id, &rq.name);
-    menu_service.add(menu.clone());
-    HttpResponse::Ok().body(menu.id().to_string())
+    let record_id = menu_service.add(menu.clone()).await.expect("msg");
+    HttpResponse::Created().json(record_id)
+}
+
+#[get("/menus/{id}")]
+pub async fn get_menu(path: web::Path<String>, menu_service: web::Data<MenuService>) -> Json<Menu> {
+    let menu = menu_service
+        .get(path.into_inner())
+        .await
+        .expect("msg")
+        .expect("msg");
+    Json(menu)
 }
 
 #[derive(Deserialize)]
 pub struct CreateIngredientRequest {
     name: String,
     #[serde(rename = "ownerId")]
-    owner_id: Option<Uuid>,
+    owner_id: Option<String>,
 }
 
 #[post("/ingredients")]
@@ -75,15 +84,30 @@ pub async fn create_ingredient(
     ingredient_service: web::Data<IngredientService>,
 ) -> impl Responder {
     let rq = rq.into_inner();
-    let ingredient = Ingredient::new(&rq.name, rq.owner_id);
-    ingredient_service.add(ingredient.clone());
-    HttpResponse::Ok().body(ingredient.id().to_string())
+    let record_id = ingredient_service
+        .add(Ingredient::new(&rq.name, rq.owner_id))
+        .await
+        .expect("msg");
+    HttpResponse::Created().json(record_id)
+}
+
+#[get("/ingredients/{id}")]
+pub async fn get_ingredient(
+    path: web::Path<String>,
+    ingredient_service: web::Data<IngredientService>,
+) -> Json<Ingredient> {
+    let ingredient = ingredient_service
+        .get(path.into_inner())
+        .await
+        .expect("msg")
+        .expect("msg");
+    Json(ingredient)
 }
 
 #[derive(Deserialize)]
 pub struct RecipeIngredient {
     #[serde(rename = "ingredientId")]
-    ingredient_id: Uuid,
+    ingredient_id: String,
     amount: Option<u8>,
     unit: String,
 }
@@ -101,21 +125,36 @@ pub async fn create_recipe(
     recipe_service: web::Data<RecipeService>,
 ) -> impl Responder {
     let rq = rq.into_inner();
-    let recipe = Recipe::new(
-        &rq.name,
-        rq.ingredients.iter().fold(HashMap::new(), |mut acc, i| {
-            acc.insert(
-                i.ingredient_id,
-                match i.unit.as_str() {
-                    "Oz" => Amount::Oz(i.amount.unwrap()),
-                    "Cl" => Amount::Cl(i.amount.unwrap()),
-                    _ => Amount::Some,
-                },
-            );
-            acc
-        }),
-        &rq.instruction,
-    );
-    recipe_service.add(recipe.clone());
-    HttpResponse::Ok().body(recipe.id().to_string())
+    let record_id = recipe_service
+        .add(Recipe::new(
+            &rq.name,
+            rq.ingredients.iter().fold(HashMap::new(), |mut acc, i| {
+                acc.insert(
+                    i.ingredient_id.clone(),
+                    match i.unit.as_str() {
+                        "Oz" => Amount::Oz(i.amount.unwrap()),
+                        "Cl" => Amount::Cl(i.amount.unwrap()),
+                        _ => Amount::Some,
+                    },
+                );
+                acc
+            }),
+            &rq.instruction,
+        ))
+        .await
+        .expect("msg");
+    HttpResponse::Created().json(record_id)
+}
+
+#[get("/recipes/{id}")]
+pub async fn get_recipe(
+    path: web::Path<String>,
+    recipe_service: web::Data<RecipeService>,
+) -> Json<Recipe> {
+    let recipe = recipe_service
+        .get(path.into_inner())
+        .await
+        .expect("msg")
+        .expect("msg");
+    Json(recipe)
 }

@@ -1,77 +1,53 @@
-use std::{collections::HashMap, sync::Mutex};
+use std::sync::Arc;
 
-use uuid::Uuid;
+use serde::{Deserialize, Serialize};
+use surrealdb::{
+    engine::remote::ws::Client,
+    sql::{Id, Thing},
+    Surreal,
+};
 
 pub mod ingredient;
 pub mod recipe;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Menu {
-    id: Uuid,
-    account_id: Uuid,
+    id: Thing,
+    account_id: String,
     name: String,
 }
 
 impl Menu {
-    pub fn new(account_id: Uuid, name: &str) -> Self {
+    pub fn new(account_id: String, name: &str) -> Self {
         Menu {
-            id: Uuid::new_v4(),
+            id: Thing {
+                tb: String::from("menu"),
+                id: Id::rand(),
+            },
             account_id,
             name: name.to_string(),
         }
     }
-
-    pub fn id(&self) -> Uuid {
-        self.id
-    }
 }
 
 pub struct MenuService {
-    menus: Mutex<HashMap<Uuid, Menu>>,
+    db: Arc<Surreal<Client>>,
 }
 
 impl MenuService {
-    pub fn create() -> Self {
-        MenuService {
-            menus: Mutex::new(HashMap::new()),
-        }
+    pub fn create(db: Arc<Surreal<Client>>) -> Self {
+        MenuService { db }
     }
 
-    pub fn add(&self, menu: Menu) {
-        self.menus.lock().unwrap().insert(menu.id, menu);
+    pub async fn add(&self, menu: Menu) -> Result<String, surrealdb::Error> {
+        self.db
+            .create("menu")
+            .content(menu.clone())
+            .await
+            .and_then(|v: Vec<Menu>| Ok(v.first().expect("msg").id.id.to_string()))
     }
 
-    pub fn get(&self, id: Uuid) -> Menu {
-        self.menus
-            .lock()
-            .unwrap()
-            .get(&id)
-            .expect(&format!("Not found menu by id = {}", id))
-            .to_owned()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn should_create_menu_service_with_empty_menus() {
-        let menus = MenuService::create();
-        assert!(menus.menus.lock().unwrap().is_empty());
-    }
-
-    #[test]
-    fn should_add_and_get_menu() {
-        let menus = MenuService::create();
-        let menu1 = Menu::new(Uuid::new_v4(), "Menu 1");
-        let menu2 = Menu::new(Uuid::new_v4(), "Menu 2");
-
-        menus.add(menu1.clone());
-        menus.add(menu2.clone());
-
-        assert_eq!(menus.menus.lock().unwrap().len(), 2);
-        assert_eq!(menus.get(menu1.id).id, menu1.id);
-        assert_eq!(menus.get(menu2.id).id, menu2.id);
+    pub async fn get(&self, id: String) -> Result<Option<Menu>, surrealdb::Error> {
+        self.db.select(("menu", id)).await
     }
 }

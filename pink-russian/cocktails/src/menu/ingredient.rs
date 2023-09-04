@@ -1,29 +1,34 @@
-use std::{collections::HashMap, sync::Mutex};
+use std::sync::Arc;
 
-use uuid::Uuid;
+use serde::{Deserialize, Serialize};
+use surrealdb::{
+    engine::remote::ws::Client,
+    opt::RecordId,
+    sql::{Id, Thing},
+    Surreal,
+};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Ingredient {
-    id: Uuid,
+    id: RecordId,
     name: String,
-    owner: Option<Uuid>,
+    owner: Option<String>,
 }
 
 impl Ingredient {
-    pub fn new(name: &str, owner_id: Option<Uuid>) -> Self {
+    pub fn new(name: &str, owner_id: Option<String>) -> Self {
         Ingredient {
-            id: Uuid::new_v4(),
+            id: Thing {
+                tb: String::from("ingredient"),
+                id: Id::rand(),
+            },
             name: name.to_string(),
             owner: owner_id,
         }
     }
-
-    pub fn id(&self) -> Uuid {
-        self.id
-    }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Amount {
     Oz(u8),
     Cl(u8),
@@ -31,55 +36,23 @@ pub enum Amount {
 }
 
 pub struct IngredientService {
-    ingredients: Mutex<HashMap<Uuid, Ingredient>>,
+    db: Arc<Surreal<Client>>,
 }
 
 impl IngredientService {
-    pub fn create() -> Self {
-        IngredientService {
-            ingredients: Mutex::new(HashMap::new()),
-        }
+    pub fn create(db: Arc<Surreal<Client>>) -> Self {
+        IngredientService { db }
     }
 
-    pub fn add(&self, ingredient: Ingredient) {
-        self.ingredients
-            .lock()
-            .unwrap()
-            .insert(ingredient.id.clone(), ingredient);
+    pub async fn add(&self, ingredient: Ingredient) -> Result<String, surrealdb::Error> {
+        self.db
+            .create("ingredient")
+            .content(ingredient)
+            .await
+            .and_then(|v: Vec<Ingredient>| Ok(v.first().expect("msg").id.id.to_string()))
     }
 
-    pub fn get(&self, id: Uuid) -> Ingredient {
-        self.ingredients
-            .lock()
-            .unwrap()
-            .get(&id)
-            .expect(format!("Not found ingredient by id {:?}", id).as_str())
-            .to_owned()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn should_create_ingredients_service_with_empty_ingredients() {
-        let ingrs = IngredientService::create();
-        assert!(ingrs.ingredients.lock().unwrap().is_empty());
-    }
-
-    #[test]
-    fn should_add_and_get_ingredient() {
-        let ingrs = IngredientService::create();
-
-        let gin = Ingredient::new("Gin", None);
-        let campari = Ingredient::new("Campari", None);
-
-        ingrs.add(gin.clone());
-        ingrs.add(campari.clone());
-
-        assert_eq!(ingrs.ingredients.lock().unwrap().len(), 2);
-        assert_eq!(ingrs.get(gin.id).id, gin.id);
-        assert_eq!(ingrs.get(campari.id).id, campari.id);
+    pub async fn get(&self, id: String) -> Result<Option<Ingredient>, surrealdb::Error> {
+        self.db.select(("ingredient", id)).await
     }
 }

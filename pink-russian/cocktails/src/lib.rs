@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use serde::{Deserialize, Serialize};
 use surrealdb::{
     engine::remote::ws::Client,
@@ -6,11 +8,6 @@ use surrealdb::{
 };
 
 pub mod menu;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct RecordId {
-    pub id: Thing,
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Account {
@@ -31,11 +28,11 @@ impl Account {
 }
 
 pub struct AccountService {
-    db: Surreal<Client>,
+    db: Arc<Surreal<Client>>,
 }
 
 impl AccountService {
-    pub fn create(db: Surreal<Client>) -> Self {
+    pub fn create(db: Arc<Surreal<Client>>) -> Self {
         AccountService { db }
     }
 
@@ -44,7 +41,7 @@ impl AccountService {
             .create("account")
             .content(account.clone())
             .await
-            .and_then(|r: RecordId| Ok(r.id.to_string()))
+            .and_then(|v: Vec<Account>| Ok(v.first().expect("msg").id.id.to_string()))
     }
 
     pub async fn get(&self, id: String) -> Result<Option<Account>, surrealdb::Error> {
