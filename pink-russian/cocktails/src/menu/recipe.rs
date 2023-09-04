@@ -62,7 +62,7 @@ mod tests {
 
     #[test]
     fn should_add_and_get_recipe() {
-        let mut recipes = RecipeService::create();
+        let recipes = RecipeService::create();
         let gin_id = Uuid::new_v4();
         let sweet_vermouth_id = Uuid::new_v4();
         let campari_id = Uuid::new_v4();

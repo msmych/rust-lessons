@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{
+    get, post,
+    web::{self, Json},
+    HttpResponse, Responder,
+};
 use cocktails::{
     menu::{
         ingredient::{Amount, Ingredient, IngredientService},
@@ -13,10 +17,31 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 #[post("/accounts")]
-pub async fn create_account(account_service: web::Data<AccountService>) -> impl Responder {
-    let account = Account::new();
-    account_service.add(account.clone());
-    HttpResponse::Ok().body(account.id().to_string())
+pub async fn create_account(
+    rq: Json<CreateAccountRequest>,
+    account_service: web::Data<AccountService>,
+) -> impl Responder {
+    let account = Account::new(rq.into_inner().name.as_str());
+    let record_id = account_service.add(account).await.expect("msg");
+    HttpResponse::Created().json(record_id)
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateAccountRequest {
+    name: String,
+}
+
+#[get("/accounts/{id}")]
+pub async fn get_account(
+    path: web::Path<String>,
+    account_service: web::Data<AccountService>,
+) -> Json<Account> {
+    let account = account_service
+        .get(path.into_inner())
+        .await
+        .expect("msg")
+        .expect("msg");
+    Json(account)
 }
 
 #[derive(Deserialize)]
