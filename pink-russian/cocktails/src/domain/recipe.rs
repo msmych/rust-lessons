@@ -1,12 +1,9 @@
-use crate::menu::ingredient::Amount;
+use common::random_id;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
-use surrealdb::{
-    engine::remote::ws::Client,
-    opt::RecordId,
-    sql::{Id, Thing},
-    Surreal,
-};
+use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
+
+use super::ingredient::Amount;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Recipe {
@@ -19,10 +16,7 @@ pub struct Recipe {
 impl Recipe {
     pub fn new(name: &str, ingredients: HashMap<String, Amount>, instruction: &str) -> Self {
         Recipe {
-            id: Thing {
-                tb: String::from("recipe"),
-                id: Id::rand(),
-            },
+            id: random_id("recipe"),
             name: name.to_string(),
             ingredients,
             instruction: instruction.to_string(),

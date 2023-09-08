@@ -1,14 +1,16 @@
 use std::sync::Arc;
 
 use actix_web::{web, App, HttpServer};
-use app::{
-    create_account, create_ingredient, create_menu, create_recipe, get_account, get_ingredient,
-    get_menu, get_recipe,
+use app::routing::{
+    account_routing::create_account, account_routing::get_account,
+    ingredient_routing::create_ingredient, ingredient_routing::get_ingredient,
+    menu_routing::create_menu, menu_routing::get_menu, recipe_routing::create_recipe,
+    recipe_routing::get_recipe,
 };
-use cocktails::menu::ingredient::IngredientService;
-use cocktails::menu::recipe::RecipeService;
-use cocktails::menu::MenuService;
-use cocktails::AccountService;
+use cocktails::domain::account::AccountService;
+use cocktails::domain::ingredient::IngredientService;
+use cocktails::domain::menu::MenuService;
+use cocktails::domain::recipe::RecipeService;
 use surrealdb::engine::remote::ws::{Client, Ws};
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;

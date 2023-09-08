@@ -1,14 +1,10 @@
 use std::sync::Arc;
 
+use common::random_id;
 use serde::{Deserialize, Serialize};
-use surrealdb::{
-    engine::remote::ws::Client,
-    opt::RecordId,
-    sql::{Id, Thing},
-    Surreal,
-};
+use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Ingredient {
     id: RecordId,
     name: String,
@@ -18,10 +14,7 @@ pub struct Ingredient {
 impl Ingredient {
     pub fn new(name: &str, owner_id: Option<String>) -> Self {
         Ingredient {
-            id: Thing {
-                tb: String::from("ingredient"),
-                id: Id::rand(),
-            },
+            id: random_id("ingredient"),
             name: name.to_string(),
             owner: owner_id,
         }

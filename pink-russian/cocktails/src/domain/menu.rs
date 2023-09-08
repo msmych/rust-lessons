@@ -1,18 +1,12 @@
 use std::sync::Arc;
 
+use common::random_id;
 use serde::{Deserialize, Serialize};
-use surrealdb::{
-    engine::remote::ws::Client,
-    sql::{Id, Thing},
-    Surreal,
-};
+use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
 
-pub mod ingredient;
-pub mod recipe;
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Menu {
-    id: Thing,
+    id: RecordId,
     account_id: String,
     name: String,
 }
@@ -20,10 +14,7 @@ pub struct Menu {
 impl Menu {
     pub fn new(account_id: String, name: &str) -> Self {
         Menu {
-            id: Thing {
-                tb: String::from("menu"),
-                id: Id::rand(),
-            },
+            id: random_id("menu"),
             account_id,
             name: name.to_string(),
         }
@@ -42,7 +33,7 @@ impl MenuService {
     pub async fn add(&self, menu: Menu) -> Result<String, surrealdb::Error> {
         self.db
             .create("menu")
-            .content(menu.clone())
+            .content(menu)
             .await
             .and_then(|v: Vec<Menu>| Ok(v.first().expect("msg").id.id.to_string()))
     }
