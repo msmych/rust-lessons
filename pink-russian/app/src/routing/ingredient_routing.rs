@@ -21,8 +21,7 @@ pub async fn create_ingredient(
     let rq = rq.into_inner();
     let record_id = ingredient_service
         .add(Ingredient::new(&rq.name, rq.owner_id))
-        .await
-        .expect("msg");
+        .await;
     HttpResponse::Created().json(record_id)
 }
 

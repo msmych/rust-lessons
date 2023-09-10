@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::random_id;
+use common::{add_entity, random_id, Entity};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
 
@@ -21,6 +21,12 @@ impl Ingredient {
     }
 }
 
+impl Entity for Ingredient {
+    fn id(&self) -> &RecordId {
+        &self.id
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Amount {
     Oz(u8),
@@ -37,12 +43,10 @@ impl IngredientService {
         IngredientService { db }
     }
 
-    pub async fn add(&self, ingredient: Ingredient) -> Result<String, surrealdb::Error> {
-        self.db
-            .create("ingredient")
-            .content(ingredient)
+    pub async fn add(&self, ingredient: Ingredient) -> String {
+        add_entity(Arc::clone(&self.db), ingredient)
             .await
-            .and_then(|v: Vec<Ingredient>| Ok(v.first().expect("msg").id.id.to_string()))
+            .expect("Failed to add ingredient")
     }
 
     pub async fn get(&self, id: String) -> Result<Option<Ingredient>, surrealdb::Error> {

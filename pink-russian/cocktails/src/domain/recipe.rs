@@ -1,11 +1,11 @@
-use common::random_id;
+use common::{add_entity, random_id, Entity};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
 
 use super::ingredient::Amount;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Recipe {
     id: RecordId,
     name: String,
@@ -24,6 +24,12 @@ impl Recipe {
     }
 }
 
+impl Entity for Recipe {
+    fn id(&self) -> &RecordId {
+        &self.id
+    }
+}
+
 pub struct RecipeService {
     db: Arc<Surreal<Client>>,
 }
@@ -33,12 +39,10 @@ impl RecipeService {
         RecipeService { db }
     }
 
-    pub async fn add(&self, recipe: Recipe) -> Result<String, surrealdb::Error> {
-        self.db
-            .create("recipe")
-            .content(recipe)
+    pub async fn add(&self, recipe: Recipe) -> String {
+        add_entity(Arc::clone(&self.db), recipe)
             .await
-            .and_then(|v: Vec<Recipe>| Ok(v.first().expect("msg").id.id.to_string()))
+            .expect("Failed to add recipe")
     }
 
     pub async fn get(&self, id: String) -> Result<Option<Recipe>, surrealdb::Error> {

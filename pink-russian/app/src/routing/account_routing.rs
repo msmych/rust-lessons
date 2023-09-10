@@ -12,7 +12,7 @@ pub async fn create_account(
     account_service: web::Data<AccountService>,
 ) -> impl Responder {
     let account = Account::new(rq.into_inner().name.as_str());
-    let record_id = account_service.add(account).await.expect("msg");
+    let record_id = account_service.add(account).await;
     HttpResponse::Created().json(record_id)
 }
 
@@ -21,11 +21,7 @@ pub async fn get_account(
     path: web::Path<String>,
     account_service: web::Data<AccountService>,
 ) -> Json<Account> {
-    let account = account_service
-        .get(path.into_inner())
-        .await
-        .expect("msg")
-        .expect("msg");
+    let account = account_service.get(path.into_inner()).await;
     Json(account)
 }
 

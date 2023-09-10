@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::random_id;
+use common::{add_entity, get_entity, random_id, record_id, Entity};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
 
@@ -19,6 +19,12 @@ impl Account {
     }
 }
 
+impl Entity for Account {
+    fn id(&self) -> &RecordId {
+        &self.id
+    }
+}
+
 pub struct AccountService {
     db: Arc<Surreal<Client>>,
 }
@@ -28,15 +34,13 @@ impl AccountService {
         AccountService { db }
     }
 
-    pub async fn add(&self, account: Account) -> Result<String, surrealdb::Error> {
-        self.db
-            .create("account")
-            .content(account)
+    pub async fn add(&self, account: Account) -> String {
+        add_entity(Arc::clone(&self.db), account)
             .await
-            .and_then(|v: Vec<Account>| Ok(v.first().expect("msg").id.id.to_string()))
+            .expect("Failed to add account")
     }
 
-    pub async fn get(&self, id: String) -> Result<Option<Account>, surrealdb::Error> {
-        self.db.select(("account", id)).await
+    pub async fn get(&self, id: String) -> Account {
+        get_entity(Arc::clone(&self.db), &record_id("account", &id)).await
     }
 }

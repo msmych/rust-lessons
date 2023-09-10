@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::random_id;
+use common::{add_entity, random_id, Entity};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
 
@@ -21,6 +21,12 @@ impl Menu {
     }
 }
 
+impl Entity for Menu {
+    fn id(&self) -> &RecordId {
+        &self.id
+    }
+}
+
 pub struct MenuService {
     db: Arc<Surreal<Client>>,
 }
@@ -30,12 +36,10 @@ impl MenuService {
         MenuService { db }
     }
 
-    pub async fn add(&self, menu: Menu) -> Result<String, surrealdb::Error> {
-        self.db
-            .create("menu")
-            .content(menu)
+    pub async fn add(&self, menu: Menu) -> String {
+        add_entity(Arc::clone(&self.db), menu)
             .await
-            .and_then(|v: Vec<Menu>| Ok(v.first().expect("msg").id.id.to_string()))
+            .expect("Failed to add menu")
     }
 
     pub async fn get(&self, id: String) -> Result<Option<Menu>, surrealdb::Error> {

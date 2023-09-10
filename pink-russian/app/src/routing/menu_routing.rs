@@ -20,7 +20,7 @@ pub async fn create_menu(
 ) -> impl Responder {
     let rq = rq.into_inner();
     let menu = Menu::new(rq.account_id, &rq.name);
-    let record_id = menu_service.add(menu).await.expect("msg");
+    let record_id = menu_service.add(menu).await;
     HttpResponse::Created().json(record_id)
 }
 

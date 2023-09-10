@@ -48,8 +48,7 @@ pub async fn create_recipe(
             }),
             &rq.instruction,
         ))
-        .await
-        .expect("msg");
+        .await;
     HttpResponse::Created().json(record_id)
 }
 
