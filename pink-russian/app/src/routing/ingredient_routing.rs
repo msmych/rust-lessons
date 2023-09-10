@@ -30,10 +30,6 @@ pub async fn get_ingredient(
     path: web::Path<String>,
     ingredient_service: web::Data<IngredientService>,
 ) -> Json<Ingredient> {
-    let ingredient = ingredient_service
-        .get(path.into_inner())
-        .await
-        .expect("msg")
-        .expect("msg");
+    let ingredient = ingredient_service.get(path.into_inner()).await;
     Json(ingredient)
 }

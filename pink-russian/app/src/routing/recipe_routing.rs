@@ -57,10 +57,6 @@ pub async fn get_recipe(
     path: web::Path<String>,
     recipe_service: web::Data<RecipeService>,
 ) -> Json<Recipe> {
-    let recipe = recipe_service
-        .get(path.into_inner())
-        .await
-        .expect("msg")
-        .expect("msg");
+    let recipe = recipe_service.get(path.into_inner()).await;
     Json(recipe)
 }

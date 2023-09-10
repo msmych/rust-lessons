@@ -1,4 +1,4 @@
-use common::{add_entity, random_id, Entity};
+use common::{random_id, repo::Repo, Entity};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, sync::Arc};
 use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
@@ -31,21 +31,21 @@ impl Entity for Recipe {
 }
 
 pub struct RecipeService {
-    db: Arc<Surreal<Client>>,
+    repo: Repo,
 }
 
 impl RecipeService {
     pub fn create(db: Arc<Surreal<Client>>) -> Self {
-        RecipeService { db }
+        RecipeService {
+            repo: Repo::create(db, "recipe"),
+        }
     }
 
     pub async fn add(&self, recipe: Recipe) -> String {
-        add_entity(Arc::clone(&self.db), recipe)
-            .await
-            .expect("Failed to add recipe")
+        self.repo.add_entity(recipe).await
     }
 
-    pub async fn get(&self, id: String) -> Result<Option<Recipe>, surrealdb::Error> {
-        self.db.select(("recipe", id)).await
+    pub async fn get(&self, id: String) -> Recipe {
+        self.repo.get_entity(&id).await
     }
 }

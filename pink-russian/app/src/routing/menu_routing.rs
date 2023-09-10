@@ -26,10 +26,6 @@ pub async fn create_menu(
 
 #[get("/menus/{id}")]
 pub async fn get_menu(path: web::Path<String>, menu_service: web::Data<MenuService>) -> Json<Menu> {
-    let menu = menu_service
-        .get(path.into_inner())
-        .await
-        .expect("msg")
-        .expect("msg");
+    let menu = menu_service.get(path.into_inner()).await;
     Json(menu)
 }
