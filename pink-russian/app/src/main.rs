@@ -11,13 +11,16 @@ use cocktails::domain::account::AccountService;
 use cocktails::domain::ingredient::IngredientService;
 use cocktails::domain::menu::MenuService;
 use cocktails::domain::recipe::RecipeService;
+use serde::{Deserialize, Serialize};
 use surrealdb::engine::remote::ws::{Client, Ws};
 use surrealdb::opt::auth::Root;
 use surrealdb::Surreal;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let db = Arc::new(setup_db().await);
+    let config: AppConfig =
+        confy::load_path("config/app-local.yaml").expect("Failed to load config");
+    let db = Arc::new(setup_db(config.db).await);
     let account_service = web::Data::new(AccountService::create(Arc::clone(&db)));
     let menu_service = web::Data::new(MenuService::create(Arc::clone(&db)));
     let ingredient_service = web::Data::new(IngredientService::create(Arc::clone(&db)));
@@ -37,24 +40,40 @@ async fn main() -> std::io::Result<()> {
             .service(create_recipe)
             .service(get_recipe)
     })
-    .bind(("localhost", 8080))?
+    .bind((config.host, config.port))?
     .run()
     .await
 }
 
-async fn setup_db() -> Surreal<Client> {
-    let db = Surreal::new::<Ws>("127.0.0.1:8000")
+async fn setup_db(config: DbConfig) -> Surreal<Client> {
+    let db = Surreal::new::<Ws>(config.address)
         .await
         .expect("Failed to connect to DB");
     db.signin(Root {
-        username: "root",
-        password: "root",
+        username: &config.username,
+        password: &config.password,
     })
     .await
     .expect("Failed to sign in to DB");
-    db.use_ns("test")
-        .use_db("test")
+    db.use_ns(config.ns)
+        .use_db(config.db)
         .await
         .expect("Failed to select namespace or DB");
     db
+}
+
+#[derive(Serialize, Deserialize, Default)]
+struct AppConfig {
+    host: String,
+    port: u16,
+    db: DbConfig,
+}
+
+#[derive(Serialize, Deserialize, Default)]
+struct DbConfig {
+    address: String,
+    username: String,
+    password: String,
+    ns: String,
+    db: String,
 }

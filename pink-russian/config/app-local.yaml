@@ -1,0 +1,8 @@
+host: localhost
+port: 8080
+db:
+  address: "127.0.0.1:8000"
+  username: root
+  password: root
+  ns: test
+  db: test
