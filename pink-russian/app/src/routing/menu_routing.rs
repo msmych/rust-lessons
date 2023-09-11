@@ -6,13 +6,6 @@ use actix_web::{
 use cocktails::domain::menu::{Menu, MenuService};
 use serde::Deserialize;
 
-#[derive(Deserialize)]
-pub struct CreateMenuRequest {
-    #[serde(rename = "accountId")]
-    account_id: String,
-    name: String,
-}
-
 #[post("/menus")]
 pub async fn create_menu(
     rq: web::Json<CreateMenuRequest>,
@@ -28,4 +21,11 @@ pub async fn create_menu(
 pub async fn get_menu(path: web::Path<String>, menu_service: web::Data<MenuService>) -> Json<Menu> {
     let menu = menu_service.get(path.into_inner()).await;
     Json(menu)
+}
+
+#[derive(Deserialize)]
+pub struct CreateMenuRequest {
+    #[serde(rename = "accountId")]
+    account_id: String,
+    name: String,
 }

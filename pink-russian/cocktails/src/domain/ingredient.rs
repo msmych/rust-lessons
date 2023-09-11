@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use common::{random_id, repo::Repo, Entity};
+use common::{random_id, record_id, repo::Repo, Entity};
 use serde::{Deserialize, Serialize};
 use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
 
@@ -12,11 +12,19 @@ pub struct Ingredient {
 }
 
 impl Ingredient {
-    pub fn new(name: &str, owner_id: Option<String>) -> Self {
+    pub fn new(name: &str, owner_id: &str) -> Self {
         Ingredient {
             id: random_id("ingredient"),
             name: name.to_string(),
-            owner: owner_id,
+            owner: Some(owner_id.to_string()),
+        }
+    }
+
+    pub fn default(id: &str, name: &str) -> Self {
+        Ingredient {
+            id: record_id("ingredient", id),
+            name: name.to_string(),
+            owner: None,
         }
     }
 }
@@ -27,7 +35,7 @@ impl Entity for Ingredient {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub enum Amount {
     Oz(u8),
     Cl(u8),

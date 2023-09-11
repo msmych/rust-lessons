@@ -43,13 +43,18 @@ async fn main() -> std::io::Result<()> {
 }
 
 async fn setup_db() -> Surreal<Client> {
-    let db = Surreal::new::<Ws>("127.0.0.1:8000").await.expect("msg");
+    let db = Surreal::new::<Ws>("127.0.0.1:8000")
+        .await
+        .expect("Failed to connect to DB");
     db.signin(Root {
         username: "root",
         password: "root",
     })
     .await
-    .expect("msg");
-    db.use_ns("test").use_db("test").await.expect("msg");
+    .expect("Failed to sign in to DB");
+    db.use_ns("test")
+        .use_db("test")
+        .await
+        .expect("Failed to select namespace or DB");
     db
 }
