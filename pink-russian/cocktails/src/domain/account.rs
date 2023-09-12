@@ -31,7 +31,7 @@ pub struct AccountService {
 
 impl AccountService {
     pub fn create(db: Arc<Surreal<Client>>) -> Self {
-        AccountService {
+        Self {
             repo: Repo::create(db, "account"),
         }
     }

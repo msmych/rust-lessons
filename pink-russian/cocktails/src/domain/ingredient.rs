@@ -48,7 +48,7 @@ pub struct IngredientService {
 
 impl IngredientService {
     pub fn create(db: Arc<Surreal<Client>>) -> Self {
-        IngredientService {
+        Self {
             repo: Repo::create(db, "ingredient"),
         }
     }

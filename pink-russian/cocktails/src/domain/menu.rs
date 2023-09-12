@@ -33,7 +33,7 @@ pub struct MenuService {
 
 impl MenuService {
     pub fn create(db: Arc<Surreal<Client>>) -> Self {
-        MenuService {
+        Self {
             repo: Repo::create(db, "menu"),
         }
     }
