@@ -38,7 +38,7 @@ impl MenuService {
         }
     }
 
-    pub async fn add(&self, menu: Menu) -> String {
+    pub async fn add(&self, menu: Menu) -> RecordId {
         self.repo.add_entity(menu).await
     }
 

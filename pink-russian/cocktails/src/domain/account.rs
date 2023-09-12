@@ -36,7 +36,7 @@ impl AccountService {
         }
     }
 
-    pub async fn add(&self, account: Account) -> String {
+    pub async fn add(&self, account: Account) -> RecordId {
         self.repo.add_entity(account).await
     }
 

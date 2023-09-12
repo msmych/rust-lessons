@@ -53,7 +53,7 @@ impl IngredientService {
         }
     }
 
-    pub async fn add(&self, ingredient: Ingredient) -> String {
+    pub async fn add(&self, ingredient: Ingredient) -> RecordId {
         self.repo.add_entity(ingredient).await
     }
 

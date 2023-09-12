@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::{engine::remote::ws::Client, Surreal};
+use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
 
 use crate::{Entity, EntityResponse};
 
@@ -18,7 +18,7 @@ impl Repo {
         }
     }
 
-    pub async fn add_entity(&self, entity: impl Entity + Serialize) -> String {
+    pub async fn add_entity(&self, entity: impl Entity + Serialize) -> RecordId {
         self.db
             .create(entity.id().tb.as_str())
             .content(&entity)
@@ -27,8 +27,7 @@ impl Repo {
                 Ok(v.first()
                     .expect(&format!("Failed to add {}", &entity.id()))
                     .id
-                    .id
-                    .to_string())
+                    .clone())
             })
             .expect(&format!("Failed to add {}", &entity.id()))
     }
