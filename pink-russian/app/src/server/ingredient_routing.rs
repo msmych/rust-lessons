@@ -8,7 +8,7 @@ use serde::Deserialize;
 
 #[post("/ingredients")]
 pub async fn create_ingredient(
-    rq: web::Json<CreateIngredientRequest>,
+    rq: Json<CreateIngredientRequest>,
     ingredient_service: web::Data<IngredientService>,
 ) -> impl Responder {
     let rq = rq.into_inner();
@@ -29,8 +29,8 @@ pub async fn get_ingredient(
 pub struct CreateIngredientRequest {
     id: Option<String>,
     name: String,
-    #[serde(rename = "ownerId")]
-    owner_id: Option<String>,
+    #[serde(rename = "accountId")]
+    account_id: Option<String>,
 }
 
 impl CreateIngredientRequest {
@@ -38,7 +38,7 @@ impl CreateIngredientRequest {
         if let Some(id) = self.id.as_ref() {
             Ingredient::default(id, &self.name)
         } else {
-            Ingredient::new(&self.name, self.owner_id.as_ref().unwrap())
+            Ingredient::new(&self.name, self.account_id.as_ref().unwrap())
         }
     }
 }

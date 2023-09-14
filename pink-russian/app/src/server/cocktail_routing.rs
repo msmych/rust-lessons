@@ -7,40 +7,43 @@ use actix_web::{
 };
 use cocktails::domain::{
     ingredient::Amount,
-    recipe::{Recipe, RecipeService},
+    cocktail::{Cocktail, CocktailService},
 };
 use serde::Deserialize;
 
-#[post("/recipes")]
-pub async fn create_recipe(
-    rq: web::Json<CreateRecipeRequest>,
-    recipe_service: web::Data<RecipeService>,
+#[post("/cocktails")]
+pub async fn create_cocktail(
+    rq: Json<CreateCocktailRequest>,
+    cocktail_service: web::Data<CocktailService>,
 ) -> impl Responder {
     let rq = rq.into_inner();
-    let record_id = recipe_service.add(rq.to_recipe()).await;
+    let record_id = cocktail_service.add(rq.to_cocktail()).await;
     HttpResponse::Created().json(record_id)
 }
 
-#[get("/recipes/{id}")]
-pub async fn get_recipe(
+#[get("/cocktails/{id}")]
+pub async fn get_cocktail(
     path: web::Path<String>,
-    recipe_service: web::Data<RecipeService>,
-) -> Json<Recipe> {
-    let recipe = recipe_service.get(path.into_inner()).await;
-    Json(recipe)
+    cocktail_service: web::Data<CocktailService>,
+) -> Json<Cocktail> {
+    let cocktail = cocktail_service.get(path.into_inner()).await;
+    Json(cocktail)
 }
 
 #[derive(Deserialize)]
-pub struct CreateRecipeRequest {
+pub struct CreateCocktailRequest {
     name: String,
-    ingredients: Vec<RecipeIngredient>,
-    instruction: String,
+    #[serde(rename = "accountId")]
+    account_id: String,
+    ingredients: Vec<CocktailIngredient>,
+    recipe: Vec<String>,
 }
 
-impl CreateRecipeRequest {
-    fn to_recipe(&self) -> Recipe {
-        Recipe::new(
+impl CreateCocktailRequest {
+    fn to_cocktail(&self) -> Cocktail {
+        Cocktail::new(
             &self.name,
+            &self.account_id,
             self.ingredients.iter().fold(HashMap::new(), |mut acc, i| {
                 acc.insert(
                     i.ingredient_id.clone(),
@@ -52,13 +55,13 @@ impl CreateRecipeRequest {
                 );
                 acc
             }),
-            &self.instruction,
+            self.recipe.clone(),
         )
     }
 }
 
 #[derive(Deserialize)]
-pub struct RecipeIngredient {
+pub struct CocktailIngredient {
     #[serde(rename = "ingredientId")]
     ingredient_id: String,
     amount: Option<u8>,

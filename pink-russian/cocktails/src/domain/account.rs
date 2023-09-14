@@ -41,6 +41,6 @@ impl AccountService {
     }
 
     pub async fn get(&self, id: String) -> Account {
-        self.repo.get_entity(&id).await
+        self.repo.get_entity(id).await
     }
 }

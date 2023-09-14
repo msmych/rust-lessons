@@ -11,14 +11,14 @@ pub trait Entity {
 
 pub fn random_id(table: &str) -> RecordId {
     RecordId {
-        tb: String::from(table),
+        tb: table.to_string(),
         id: Id::rand(),
     }
 }
 
 pub fn record_id(table: &str, id: &str) -> RecordId {
     RecordId {
-        tb: String::from(table),
+        tb: table.to_string(),
         id: Id::from(id),
     }
 }

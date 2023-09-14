@@ -8,23 +8,24 @@ use surrealdb::{engine::remote::ws::Client, opt::RecordId, Surreal};
 pub struct Ingredient {
     id: RecordId,
     name: String,
-    owner: Option<String>,
+    #[serde(rename = "accountId")]
+    account_id: Option<String>,
 }
 
 impl Ingredient {
-    pub fn new(name: &str, owner_id: &str) -> Self {
-        Ingredient {
+    pub fn new(name: &str, account_id: &str) -> Self {
+        Self {
             id: random_id("ingredient"),
             name: name.to_string(),
-            owner: Some(owner_id.to_string()),
+            account_id: Some(account_id.to_string()),
         }
     }
 
     pub fn default(id: &str, name: &str) -> Self {
-        Ingredient {
+        Self {
             id: record_id("ingredient", id),
             name: name.to_string(),
-            owner: None,
+            account_id: None,
         }
     }
 }
@@ -58,6 +59,6 @@ impl IngredientService {
     }
 
     pub async fn get(&self, id: String) -> Ingredient {
-        self.repo.get_entity(&id).await
+        self.repo.get_entity(id).await
     }
 }
